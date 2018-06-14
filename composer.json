@@ -1,0 +1,20 @@
+{
+    "name": "dotsafe/beavor",
+    "description": "Lightweight library to cast array/std classes (generally as a result fo an api response) to a DTO class",
+    "type": "library",
+    "require-dev": {
+        "codeception/codeception": "<2.4.0"
+    },
+    "authors": [
+        {
+            "name": "Loïc",
+            "email": "loic.gouttefangeas.pro@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Beavor\\" : "src"
+        }
+    },
+    "require": {}
+}
