@@ -1,6 +1,12 @@
 <?php
 
 namespace Beavor;
+use Beavor\Actions\ActionChain;
+use Beavor\Actions\UsePublicProperty;
+use Beavor\Actions\UseSetter;
+use PhpDocReader\PhpDocReader;
+use ReflectionParameter;
+use ReflectionProperty;
 
 /**
  * Class Objify
@@ -14,6 +20,7 @@ class Objify
 
         return $selfInstance->$name($arguments);
     }
+
 
 
     /**
@@ -30,10 +37,9 @@ class Objify
         if (is_array($source)) {
             $source = json_decode(json_encode($source));
         }
-        $sourceReflection = new \ReflectionObject($source);
-        $sourceProperties = $sourceReflection->getProperties();
+        $sourceProperties = (new \ReflectionObject($source))->getProperties();
         foreach ($sourceProperties as $sourceProperty) {
-            self::callPropertySetter($destination, $source, $sourceProperty);
+            $this->callPropertySetter($destination, $source, $sourceProperty);
         }
 
         return $destination;
@@ -44,30 +50,22 @@ class Objify
      * @param \stdClass $source
      * @param           $sourceProperty
      */
-    protected static function callPropertySetter($destination, \stdClass $source, $sourceProperty)
+    protected function callPropertySetter($destination, \stdClass $source, $sourceProperty)
     {
-        $name = $sourceProperty->getName();
-        $upperCaseName = ucfirst($name); // holder -> Holder
-        $setter = "set$upperCaseName"; // setHolder
-        if (method_exists($destination, $setter)) {
-            $destination->$setter($source->$name); // $destination->setHolder($source->holder)
+        $actionClasses = [
+            UseSetter::class,
+            UsePublicProperty::class,
+        ];
 
-            return;
-        }
-        $destinationReflection = new \ReflectionClass($destination);
-        if (false === $destinationReflection->hasProperty($name)) {
-            return;
-        }
-        $destinationProperty = $destinationReflection->getProperty($name);
-        if (false === $destinationProperty->isPublic()) {
-            return;
-        }
+        $actions = array_map(function($action) use ($sourceProperty, $destination, $source) {
+            /** @var ActionInterface $actionInstance */
+            return new $action($source, $destination, $sourceProperty);
+        }, $actionClasses);
 
-        if (false === $destinationProperty->isPublic()) {
-            return;
-        }
+        (new ActionChain($actions))->handle($source, $destination, $sourceProperty);
 
-        $destination->$name = $source->$name;
     }
+
+
 
 }

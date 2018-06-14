@@ -16,5 +16,7 @@
             "Beavor\\" : "src"
         }
     },
-    "require": {}
+    "require": {
+        "php-di/phpdoc-reader": "^2.1"
+    }
 }
