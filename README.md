@@ -1,7 +1,7 @@
 # Beavor
 > _Parce qu'ils voulaient pas que que je l'appelle PerCaster_
 
-## Objify ça fait quoi
+## Beavor ça fait quoi
 
 Ca permet d'éviter ça
 ```php
