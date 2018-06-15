@@ -36,7 +36,7 @@ class GenerateDto extends Command
         $data = json_decode($json, true);
         $this->buildClassFromJson($data, $class, new PhpNamespace($class->getNamespace()->getName() . "\\" . $class->getName()));
 
-        $this->generateClass($class);
+        $this->generateFile($class);
     }
 
     /**
@@ -49,23 +49,32 @@ class GenerateDto extends Command
         foreach ($data as $propertyName => $value) {
             $this->buildProperty($class, $namespace, $propertyName, $value);
         }
-        $this->generateClass($class);
+        $this->generateFile($class);
     }
 
     /**
      * @param $className
      * @param $class
      */
-    protected function generateClass($class)
+    protected function generateFile($class)
     {
         $namespace = $class->getNamespace();
-        $targetDirectory = getcwd() . "/src/" . $namespace->getName() . "/";
+
+        $psr4 = require getcwd() ."/vendor/composer/autoload_psr4.php";
+        $targetDirectory = getcwd() ;
+        foreach ($psr4 as $psr4_namespace => $dir){
+            $targetDirectory = str_replace($psr4_namespace, current($dir)."/", $class->getNamespace()->getName());
+        }
+
+
+
+
         // dir doesn't exist, make it
         if (!is_dir($targetDirectory) && !mkdir($targetDirectory, 0777, true) && !is_dir($targetDirectory)) {
             throw new \RuntimeException(sprintf('Directory "%s" was not created', $targetDirectory));
         }
 
-        file_put_contents($targetDirectory . $class->getName() . ".php", "<?php\n\r" . $namespace . $class);
+        file_put_contents($targetDirectory."/" . $class->getName() . ".php", "<?php\n\r" . $namespace . $class);
     }
 
     /**

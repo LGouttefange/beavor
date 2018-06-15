@@ -46,6 +46,7 @@ class Objify
      */
     public function make($destination, $source)
     {
+
         if (is_string($destination)) {
             $destination = new $destination();
         }
