@@ -46,11 +46,6 @@ $cconnectObject->getLastName();
 + Fonctionne avec des champs publics ou avec des setters
 + Possibilité de fonctionner avec des accesseurs/mutateurs
 
-### Inconvénients
-
-+ Les DTO imbriqués ne sont pas encore gérés
-+ Devoir créer soi-même les classes DTO 
-
 ## Utilisation
 
 Pour rappel : un exemple d'usage tout simple :
@@ -124,22 +119,92 @@ $cconnectObject->getLastName();
 
 ```
 
-### Petit plus
+Ou même le JSON brut :
 
-Un trait Beavor\Helpers\Arrayable permet de transformer le DTO en tableau (mais il est optionnel) :
+Ou un objet :
+
+```php
+<?php 
+
+$cconnectObject = (new \Beavor\Objify)->fromRawJson( CconnectUserDto::class, '<<le JSON>>');
+$cconnectObject->getGuid();
+$cconnectObject->getLastName();
+...
+
+```
+
+Un DTO peut contenir d'autres DTO :
 
 
 ```php
 <?php 
-$cconnectUser = json_decode('<<le JSON>>');
-$cconnectObject = \Beavor\Objify::make( Beavor\Dto\CconnectUserDto::class, $cconnectUser);
 
-$cconnectArray = $cconnectObject->toArray();
+$cconnectObject = \Beavor\Objify::make( Beavor\Dto\CconnectUserDto::class, $cconnectUser);
+$cconnectObject->getGuid();
+$cconnectObject->getAddress(); // instance de CconnectUserAddressDto
+$cconnectObject->getAddress()->getCity();
 ...
-$firstName = $cconnectArray['FirstName'];
 
 ```
-Attention : n'utilise pas encore les Getters pour générer le tableau
+
+Si le DTO enfant n'est pas défini dans la classe, alors on a un stdClass :
+
+```php
+<?php 
+
+$cconnectObject = \Beavor\Objify::make( Beavor\Dto\CconnectUserDto::class, $cconnectUser);
+$cconnectObject->getGuid();
+$cconnectObject->getAddress(); // instance de stdClass
+$cconnectObject->getAddress()->city;
+...
+
+```
+
+Pour définir le DTO enfant, utilisez l'annotation de PhpDoc sur le champ concerné :
+
+
+```php
+<?php
+
+namespace Helper;
+
+class CconnectUserDto
+{
+    ...
+    
+    /** @var Address */
+    public $Adress;
+
+```
+
+Ca fonctionne aussi avec les collections d'objet :
+
+
+```php
+<?php
+
+namespace Helper;
+
+class GetUsersDto
+{
+    ...
+    
+    /** @var User[] */
+    public $users;
+
+```
+
+
+```php
+<?php 
+
+$cconnectObject = (new \Beavor\Objify)->make( GetUsersDto::class, $response);
+
+foreach ($users as $user) { // $user est une instance de User
+    $user->getName();
+}
+
+```
 
 ## Le DTO
 
@@ -160,6 +225,8 @@ class DummyClass
     public $dummyProperty;
     protected $dummySetterProperty;
     private $unaccessibleProperty;
+    /** @var DummyClass */
+    public $nestedProperty;
 
     /**
      * @return mixed
@@ -192,8 +259,18 @@ class DummyClass
 3. Si la propriété est protégée et sans setter, elle ne sera jamais touchée (ex: le _unaccessibleProperty_)
 4. Lors du casting aucune propriété n'est rajoutée au DTO. Il n'a que ce qui lui est défini
 
-## Les TODO 
 
-1. Le nested casting avec l'utilisation des PhpDoc pour le type hinting
-2. Tout ce qui est nested response en général ?
-3. Un générateur de classe DTO à partir d'un JSON
+# Generation de DTO
+
+Si vous avez beaucoup de champs dans votre DTO, que vous avez beaucoup de classes, ou les deux, utilisez le script de génération de DTO !
+
+```php vendor/bin/beavor.php```
+
+On vous demandera :
+1. Le nom de classe (ex: CniUploadResponseDto)
+2. Le namespace (ex: \Beavor\Dto) 
+3. Le JSON minifié de la réponse à transformer
+
+Les fichiers seront automatiquement générés dans votre arborescence directement, avec une détection des racines PSR-4 pour que vous n'ayez plus rien à toucher.
+
+Par défaut, tous les Dto sont générés avec des getters et des champs publics.

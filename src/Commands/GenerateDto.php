@@ -90,13 +90,14 @@ class GenerateDto extends Command
             return;
         }
         $class->addProperty($propertyName)->setVisibility('public');
-
-
+        $getter = $class->addMethod("get".ucfirst($propertyName));
+        $getter->setBody("return \$this->$propertyName;");
 
         // no more action is needed
         if (!is_array($value)) {
             return;
         }
+        $class->getProperty($propertyName)->setValue([]);
         //we dont know what it has, so we default to a simple array
         if (count($value) === 0) {
             $class->getProperty($propertyName)->addComment("@var array");
@@ -111,6 +112,7 @@ class GenerateDto extends Command
             if (is_array($value[0])) {
                 $this->buildProperty($newNestedClass,$newNameSpace, $propertyName, $value[0]);
                 $class->getProperty($propertyName)->addComment("@var ${newClassFullName}[]");
+                $getter->addComment("@return ${newClassFullName}[]");
                 $this->buildClassFromJson($value[0], $newNestedClass, $newNameSpace);
                 return;
             }
@@ -118,6 +120,7 @@ class GenerateDto extends Command
 
         // class property Has One
         $class->getProperty($propertyName)->addComment("@var $newClassFullName");
+        $getter->addComment("@return $newClassFullName");
         $this->buildClassFromJson($value, $newNestedClass, $newNameSpace);
 
 
