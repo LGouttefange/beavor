@@ -29,15 +29,10 @@ class UseSetter extends AbstractAction
         $reader = new PhpDocReader();
         $setter = $this->setter;
 
-        $propertyName = $this->propertyName;
-        $parameter = new ReflectionParameter([get_class($this->destination), $setter], $propertyName);
-        $sourceValue = $this->source->$propertyName;
-        $targetClass = $reader->getParameterClass($parameter) ?: $this->getFieldClass();
-        if($targetClass){
-            $sourceValue = (new Objify)->make($targetClass, $sourceValue);
-        }
+        $sourceValue = $this->sourceValueWIthCastIfNecessary();
 
         $this->destination->$setter($sourceValue); // $destination->setHolder($source->holder)
     }
+
 
 }

@@ -17,6 +17,8 @@
         }
     },
     "require": {
-        "php-di/phpdoc-reader": "^2.1"
+        "php-di/phpdoc-reader": "^2.1",
+        "symfony/console": "^4.1",
+        "nette/php-generator": "^3.1"
     }
 }

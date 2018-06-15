@@ -28,6 +28,13 @@ class ObjifyCest
         $I->assertEquals($result->dummyProperty, self::DUMMY_VALUE);
     }
 
+    public function castingRawJsonWorks(UnitTester $I)
+    {
+        $result = (new Objify)->fromRawJson(new DummyClass(), '{"dummyProperty" : "' . self::DUMMY_VALUE . '"}');
+        $I->assertEquals($result->dummyProperty, self::DUMMY_VALUE);
+    }
+
+
     public function castingStdClassWorks(UnitTester $I)
     {
         $data = new stdClass();

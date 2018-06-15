@@ -13,14 +13,14 @@ class UsePublicProperty extends AbstractAction
 {
     public function canHandle()
     {
-        try{
+        try {
             $destinationReflection = $this->getDestinationReflexion();
             if (false === $destinationReflection->hasProperty($this->propertyName)) {
                 return false;
             }
 
             return $this->getDestinationProperty()->isPublic();
-        }catch (\ReflectionException $e) {
+        } catch (\ReflectionException $e) {
             return false;
         }
     }
@@ -32,13 +32,7 @@ class UsePublicProperty extends AbstractAction
     public function doIt()
     {
         $propertyName = $this->propertyName;
-        $sourceValue = $this->source->$propertyName;
-
-        $fieldClass = $this->getFieldClass();
-        if($fieldClass){
-            $sourceValue  = (new Objify)->make($fieldClass, $sourceValue);
-        }
+        $sourceValue = $this->sourceValueWIthCastIfNecessary();
         $this->destination->$propertyName = $sourceValue;
-
     }
 }

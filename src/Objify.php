@@ -2,6 +2,7 @@
 
 namespace Beavor;
 use Beavor\Actions\ActionChain;
+use Beavor\Actions\ActionInterface;
 use Beavor\Actions\UsePublicProperty;
 use Beavor\Actions\UseSetter;
 use PhpDocReader\PhpDocReader;
@@ -10,7 +11,7 @@ use ReflectionProperty;
 
 /**
  * Class Objify
- * @static $truc
+ * @method static makeStatic(string|object $destination, string|array|object $source)
  */
 class Objify
 {
@@ -22,6 +23,20 @@ class Objify
     }
 
 
+    /**
+     * @param string|object   $destination
+     * @param string $source
+     *
+     * @return \stdClass
+     */
+    public function fromRawJson($destination, $source)
+    {
+        $data = json_decode($source);
+        if($data === null){
+            throw new \InvalidArgumentException("Provided JSON is not valid");
+        }
+        return $this->make($destination, $data);
+    }
 
     /**
      * @param string|object   $destination
@@ -34,8 +49,12 @@ class Objify
         if (is_string($destination)) {
             $destination = new $destination();
         }
+
         if (is_array($source)) {
             $source = json_decode(json_encode($source));
+        }
+        if(is_array($source)){
+            return $destination;
         }
         $sourceProperties = (new \ReflectionObject($source))->getProperties();
         foreach ($sourceProperties as $sourceProperty) {
