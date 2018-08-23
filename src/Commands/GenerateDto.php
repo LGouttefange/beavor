@@ -3,6 +3,7 @@
 
 namespace Beavor\Commands;
 
+use Beavor\Helpers\SanitizedSourceString;
 use Nette\PhpGenerator\ClassType;
 use Nette\PhpGenerator\PhpNamespace;
 use Symfony\Component\Console\Command\Command;
@@ -31,10 +32,10 @@ class GenerateDto extends Command
 
         $class = new ClassType($className, new PhpNamespace($namespaceName));
         $class->addComment("Auto generated Beavor DTO class");
-        $json = $input->getOption('json') ?: $questionHelper->ask($input, $output, new Question("Your JSON ?"));
-        preg_replace("/\n?\r?/", "", $json);
-        $data = json_decode($json, true);
-        $this->buildClassFromJson($data, $class, new PhpNamespace($class->getNamespace()->getName() . "\\" . $class->getName()));
+        $source = $input->getOption('json') ?: $questionHelper->ask($input, $output, new Question("Your JSON / XML ?"));
+        $source = (new SanitizedSourceString($source))->getValue();
+        $source = json_decode($source, true) ?: json_decode(json_encode(simplexml_load_string($source)), true);
+        $this->buildClassFromJson($source, $class, new PhpNamespace($class->getNamespace()->getName() . "\\" . $class->getName()));
 
         $this->generateFile($class);
     }

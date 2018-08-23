@@ -5,6 +5,7 @@ use Beavor\Actions\ActionChain;
 use Beavor\Actions\ActionInterface;
 use Beavor\Actions\UsePublicProperty;
 use Beavor\Actions\UseSetter;
+use Beavor\Helpers\SanitizedSourceString;
 use PhpDocReader\PhpDocReader;
 use ReflectionParameter;
 use ReflectionProperty;
@@ -36,6 +37,17 @@ class Objify
             throw new \InvalidArgumentException("Provided JSON is not valid");
         }
         return $this->make($destination, $data);
+    }
+
+    public function fromRawXml($destination, $source)
+    {
+        $data = simplexml_load_string((new SanitizedSourceString($source))->getValue());
+
+        $json  = json_encode($data);
+        $xmlArr = json_decode($json, true);
+
+        return $this->make($destination, $xmlArr);
+
     }
 
     /**

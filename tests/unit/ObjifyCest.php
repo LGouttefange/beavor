@@ -1,6 +1,7 @@
 <?php
 
 
+use Beavor\Dto\Partners\Eureka\PaymentSchedule;
 use Beavor\Objify;
 use Helper\DummyClass;
 
@@ -32,6 +33,27 @@ class ObjifyCest
     {
         $result = (new Objify)->fromRawJson(new DummyClass(), '{"dummyProperty" : "' . self::DUMMY_VALUE . '"}');
         $I->assertEquals($result->dummyProperty, self::DUMMY_VALUE);
+    }
+
+
+    public function castingRawXmlWorks(UnitTester $I)
+    {
+        $result = (new Objify)->fromRawXml(new DummyClass(), '<?xml version="1.0"?><Root><dummyProperty>'. self::DUMMY_VALUE .'</dummyProperty></Root>');
+        $I->assertEquals($result->dummyProperty, self::DUMMY_VALUE);
+    }
+
+    public function castingSoapXmlWorks(UnitTester $I)
+    {
+        /** @var PaymentSchedule $result */
+        $result = (new Objify)->fromRawXml(PaymentSchedule::class,  file_get_contents(__DIR__."/../_data/GetPaymentScheduleResponse.xml"));
+        $I->assertEquals($result->getContent()->getAmount(), 50000);
+    }
+
+    public function castingNestedXmlWorks(UnitTester $I)
+    {
+        $result = (new Objify)->fromRawXml(new DummyClass(), '<?xml version="1.0"?><Root><dummyProperty>dummyValue</dummyProperty><nestedProperty><dummyProperty>dummyValue</dummyProperty></nestedProperty></Root>');
+        $I->assertEquals($result->dummyProperty, self::DUMMY_VALUE);
+        $I->assertEquals($result->nestedProperty->dummyProperty, self::DUMMY_VALUE);
     }
 
 
