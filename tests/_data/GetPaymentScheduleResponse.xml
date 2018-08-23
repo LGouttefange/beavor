@@ -1,0 +1,87 @@
+<s:Envelope
+        xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">
+    <s:Body>
+        <GetPaymentScheduleResponse
+                xmlns="***REMOVED***">
+            <paymentScheduleResponseMessage
+                    xmlns:a="***REMOVED***"
+                    xmlns:i="***REMOVED***">
+                <a:PaymentOptionRef>62</a:PaymentOptionRef>
+                <a:OrderDate>2018-06-22T18:37:31+02:00</a:OrderDate>
+                <a:Amount>50000</a:Amount>
+                <a:Code>0</a:Code>
+                <a:Message>Request successfully processed</a:Message>
+                <a:ScheduleInfo
+                        xmlns:b="***REMOVED***">
+                    <b:Schedule>
+                        <b:PaymentScheduleInfoItem>
+                            <b:ItemAmount>3747</b:ItemAmount>
+                            <b:ItemDate>2018-06-22T18:37:31+02:00</b:ItemDate>
+                            <b:ItemRank>1</b:ItemRank>
+                            <b:ScheduleRule>
+                                <b:AmountDistributionWeight>0</b:AmountDistributionWeight>
+                                <b:DateDelay i:nil="true"/>
+                                <b:FirstDueDay i:nil="true"/>
+                                <b:FirstDueMonthDelay i:nil="true"/>
+                                <b:HasFees>true</b:HasFees>
+                                <b:IsBondRank>false</b:IsBondRank>
+                                <b:SecondDueDay i:nil="true"/>
+                                <b:SecondDueMonthDelay i:nil="true"/>
+                                <b:ThresholdDay i:nil="true"/>
+                            </b:ScheduleRule>
+                        </b:PaymentScheduleInfoItem>
+                        <b:PaymentScheduleInfoItem>
+                            <b:ItemAmount>16666</b:ItemAmount>
+                            <b:ItemDate>2018-07-22T18:37:31+02:00</b:ItemDate>
+                            <b:ItemRank>2</b:ItemRank>
+                            <b:ScheduleRule>
+                                <b:AmountDistributionWeight>1</b:AmountDistributionWeight>
+                                <b:DateDelay>30</b:DateDelay>
+                                <b:FirstDueDay i:nil="true"/>
+                                <b:FirstDueMonthDelay i:nil="true"/>
+                                <b:HasFees>false</b:HasFees>
+                                <b:IsBondRank>false</b:IsBondRank>
+                                <b:SecondDueDay i:nil="true"/>
+                                <b:SecondDueMonthDelay i:nil="true"/>
+                                <b:ThresholdDay i:nil="true"/>
+                            </b:ScheduleRule>
+                        </b:PaymentScheduleInfoItem>
+                        <b:PaymentScheduleInfoItem>
+                            <b:ItemAmount>16666</b:ItemAmount>
+                            <b:ItemDate>2018-08-21T18:37:31+02:00</b:ItemDate>
+                            <b:ItemRank>3</b:ItemRank>
+                            <b:ScheduleRule>
+                                <b:AmountDistributionWeight>1</b:AmountDistributionWeight>
+                                <b:DateDelay>60</b:DateDelay>
+                                <b:FirstDueDay i:nil="true"/>
+                                <b:FirstDueMonthDelay i:nil="true"/>
+                                <b:HasFees>false</b:HasFees>
+                                <b:IsBondRank>false</b:IsBondRank>
+                                <b:SecondDueDay i:nil="true"/>
+                                <b:SecondDueMonthDelay i:nil="true"/>
+                                <b:ThresholdDay i:nil="true"/>
+                            </b:ScheduleRule>
+                        </b:PaymentScheduleInfoItem>
+                        <b:PaymentScheduleInfoItem>
+                            <b:ItemAmount>16666</b:ItemAmount>
+                            <b:ItemDate>2018-09-20T18:37:31+02:00</b:ItemDate>
+                            <b:ItemRank>4</b:ItemRank>
+                            <b:ScheduleRule>
+                                <b:AmountDistributionWeight>1</b:AmountDistributionWeight>
+                                <b:DateDelay>90</b:DateDelay>
+                                <b:FirstDueDay i:nil="true"/>
+                                <b:FirstDueMonthDelay i:nil="true"/>
+                                <b:HasFees>false</b:HasFees>
+                                <b:IsBondRank>false</b:IsBondRank>
+                                <b:SecondDueDay i:nil="true"/>
+                                <b:SecondDueMonthDelay i:nil="true"/>
+                                <b:ThresholdDay i:nil="true"/>
+                            </b:ScheduleRule>
+                        </b:PaymentScheduleInfoItem>
+                    </b:Schedule>
+                </a:ScheduleInfo>
+                <a:FeesAmount>3745</a:FeesAmount>
+            </paymentScheduleResponseMessage>
+        </GetPaymentScheduleResponse>
+    </s:Body>
+</s:Envelope>
