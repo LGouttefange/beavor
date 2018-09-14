@@ -1,18 +1,21 @@
 <?php
 
 namespace Beavor;
+
 use Beavor\Actions\ActionChain;
 use Beavor\Actions\ActionInterface;
 use Beavor\Actions\UsePublicProperty;
 use Beavor\Actions\UseSetter;
+use Beavor\Helpers\CollectionInterface;
 use Beavor\Helpers\SanitizedSourceString;
 use PhpDocReader\PhpDocReader;
+use Psr\Http\Message\ResponseInterface;
 use ReflectionParameter;
 use ReflectionProperty;
 
 /**
  * Class Objify
- * @method static makeStatic(string|object $destination, string|array|object $source)
+ * @method static makeStatic(string | object $destination, string | array | object $source)
  */
 class Objify
 {
@@ -25,17 +28,18 @@ class Objify
 
 
     /**
-     * @param string|object   $destination
-     * @param string $source
+     * @param string|object $destination
+     * @param string        $source
      *
      * @return \stdClass
      */
     public function fromRawJson($destination, $source)
     {
         $data = json_decode($source);
-        if($data === null){
+        if ($data === null) {
             throw new \InvalidArgumentException("Provided JSON is not valid");
         }
+
         return $this->make($destination, $data);
     }
 
@@ -43,7 +47,7 @@ class Objify
     {
         $data = simplexml_load_string((new SanitizedSourceString($source))->getValue());
 
-        $json  = json_encode($data);
+        $json = json_encode($data);
         $xmlArr = json_decode($json, true);
 
         return $this->make($destination, $xmlArr);
@@ -63,10 +67,19 @@ class Objify
             $destination = new $destination();
         }
 
+        if ($source instanceof ResponseInterface) {
+            $source = json_decode((string) $source->getBody());
+        }
+
         if (is_array($source)) {
             $source = json_decode(json_encode($source));
         }
-        if(is_array($source)){
+        if (is_array($source) ) {
+            if($destination instanceof CollectionInterface){
+                $destination->setEntries(array_map(function($entry) use($destination){
+                    return $this->make($destination->getEntriesClass(), $entry);
+                    }, $source));
+            }
             return $destination;
         }
         $sourceProperties = (new \ReflectionObject($source))->getProperties();
@@ -89,7 +102,7 @@ class Objify
             UsePublicProperty::class,
         ];
 
-        $actions = array_map(function($action) use ($sourceProperty, $destination, $source) {
+        $actions = array_map(function ($action) use ($sourceProperty, $destination, $source) {
             /** @var ActionInterface $actionInstance */
             return new $action($source, $destination, $sourceProperty);
         }, $actionClasses);
@@ -97,7 +110,6 @@ class Objify
         (new ActionChain($actions))->handle($source, $destination, $sourceProperty);
 
     }
-
 
 
 }

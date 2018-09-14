@@ -4,6 +4,7 @@
 use Beavor\Dto\Partners\Eureka\PaymentSchedule;
 use Beavor\Objify;
 use Helper\DummyClass;
+use Helper\DummyClassCollection;
 
 class ObjifyCest
 {
@@ -118,5 +119,12 @@ class ObjifyCest
         /** @var DummyClass $result */
         $result = (new Objify)->make(DummyClass::class, ['nestedSetterDocProperty' => ['dummySetterProperty' => self::DUMMY_VALUE]]);
         $I->assertEquals($result->getNestedSetterDocProperty()->getDummySetterProperty(), self::DUMMY_VALUE);
+    }
+
+    public function rootCollectionCreatesChildElements(UnitTester $I)
+    {
+        /** @var DummyClassCollection $result */
+        $result = (new Objify)->make(DummyClassCollection::class, [[['dummyProperty' => self::DUMMY_VALUE]], ['dummyProperty' => self::DUMMY_VALUE]]);
+        $I->assertCount(2, $result->objects);
     }
 }
