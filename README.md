@@ -1,3 +1,5 @@
+[Not speaking Baguette ? Find the english doc right there](README.en.md)
+
 # Beavor
 > _Parce qu'ils voulaient pas que que je l'appelle PerCaster_
 
