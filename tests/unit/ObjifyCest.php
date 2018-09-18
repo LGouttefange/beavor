@@ -126,5 +126,6 @@ class ObjifyCest
         /** @var DummyClassCollection $result */
         $result = (new Objify)->make(DummyClassCollection::class, [[['dummyProperty' => self::DUMMY_VALUE]], ['dummyProperty' => self::DUMMY_VALUE]]);
         $I->assertCount(2, $result->objects);
+        $I->assertTrue($result->objects[0] instanceof DummyClass);
     }
 }

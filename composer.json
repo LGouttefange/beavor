@@ -1,5 +1,6 @@
 {
-    "name": "dotsafe/beavor",
+    "name": "lgouttefange/beavor",
+
     "description": "Lightweight library to cast array/std classes (generally as a result fo an api response) to a DTO class",
     "type": "library",
     "require-dev": {
