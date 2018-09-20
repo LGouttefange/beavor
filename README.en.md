@@ -63,7 +63,7 @@ Or let's start static (TODO : find a way to prevent warning. I swear it doesn't 
 ```php
 <?php 
 
-$cconnectObject = \Beavor\Objify::makeStatic(new CconnectUserDto(), $cconnectUser);
+$cconnectObject = \Beavor\Objify::make(new CconnectUserDto(), $cconnectUser);
 $cconnectObject->getGuid();
 $cconnectObject->getLastName();
 ...
