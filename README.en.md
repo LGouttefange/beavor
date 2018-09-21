@@ -118,12 +118,22 @@ $cconnectObject->getLastName();
 
 ```
 
-Event the raw JSON :
+Even the raw JSON :
 
 ```php
 <?php 
 
 $cconnectObject = (new \Beavor\Objify)->fromRawJson( CconnectUserDto::class, '<<le JSON>>');
+$cconnectObject->getGuid();
+$cconnectObject->getLastName();
+...
+
+Or a Psr7 Response (great for Guzzle usage) :
+
+```php
+<?php 
+
+$cconnectObject = (new \Beavor\Objify)->fromRawJson( CconnectUserDto::class, $guzzle->get(...));
 $cconnectObject->getGuid();
 $cconnectObject->getLastName();
 ...
@@ -144,7 +154,7 @@ $cconnectObject->getAddress()->getCity();
 
 ```
 
-Si the child's class is not defined within the DTO, it'll be a stdClass :
+If the child's class is not defined within the DTO, it'll be a stdClass :
 
 ```php
 <?php 
@@ -174,7 +184,7 @@ class CconnectUserDto
 
 ```
 
-Also works with objects collection :
+Also works with objects collections :
 
 
 ```php
@@ -206,7 +216,7 @@ foreach ($users as $user) { // $user is an instance  of User
 ## The DTO
 
 
-Exemple de DTO :
+An example of DTO :
 
 ```php
 <?php
@@ -261,7 +271,8 @@ class DummyClass
 
 Manually creating DTOs can be a hassle, I know. That's why a script is bundled !
 
-```php vendor/bin/beavor.php```
+(Messed up the vendor bin. Fix coming soon for vendor/bin usage)
+```php vendor/lgouttefange/beavor/beavor.php```
 
 You will be asked :
 1. The className (ex: CniUploadResponseDto)
