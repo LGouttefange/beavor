@@ -20,18 +20,33 @@ class UseSetter extends AbstractAction
         return method_exists($this->destination, $this->setter);
     }
 
+
     /**
      * @throws \ReflectionException
      * @throws \PhpDocReader\AnnotationException
      */
     public function doIt()
     {
-        $reader = new PhpDocReader();
         $setter = $this->setter;
-
         $sourceValue = $this->sourceValueWIthCastIfNecessary();
 
         $this->destination->$setter($sourceValue); // $destination->setHolder($source->holder)
+    }
+
+    protected function getFieldClass()
+    {
+        $varAnnotationClass = parent::getFieldClass();
+        if($varAnnotationClass !== null){
+            return $varAnnotationClass;
+        }
+        return $this->getSetterParameterClass();
+    }
+
+    private function getSetterParameterClass()
+    {
+        $reader = new PhpDocReader();
+        $reflectedSetter = new \ReflectionParameter([$this->destination, $this->setter], $this->propertyName);
+        return  $reader->getParameterClass($reflectedSetter);
     }
 
 
