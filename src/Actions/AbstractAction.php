@@ -33,7 +33,11 @@ abstract class AbstractAction implements ActionInterface
      */
     protected function getDestinationProperty()
     {
-        return ($this->getDestinationReflexion())->getProperty($this->propertyName);
+        $reflectionClass = $this->getDestinationReflexion();
+
+        $name = $this->propertyName;
+
+        return $reflectionClass->getProperty($name);
     }
 
     /**
