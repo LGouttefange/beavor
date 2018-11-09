@@ -12,6 +12,10 @@ class ObjifyCest
 
 
     // tests
+    const DUMMY_PROPERTY = 'dummyProperty';
+
+    const DUMMY_SETTER_PROPERTY = 'dummySetterProperty';
+
     public function staticCallWorks(UnitTester $I)
     {
         $result = Objify::make(new DummyClass(), new stdClass());
@@ -26,7 +30,7 @@ class ObjifyCest
 
     public function castingArrayWorks(UnitTester $I)
     {
-        $result = (new Objify)->make(new DummyClass(), ['dummyProperty' => self::DUMMY_VALUE]);
+        $result = (new Objify)->make(new DummyClass(), [self::DUMMY_PROPERTY => self::DUMMY_VALUE]);
         $I->assertEquals($result->dummyProperty, self::DUMMY_VALUE);
     }
 
@@ -43,12 +47,6 @@ class ObjifyCest
         $I->assertEquals($result->dummyProperty, self::DUMMY_VALUE);
     }
 
-    public function castingSoapXmlWorks(UnitTester $I)
-    {
-        /** @var PaymentSchedule $result */
-        $result = (new Objify)->fromRawXml(PaymentSchedule::class,  file_get_contents(__DIR__."/../_data/GetPaymentScheduleResponse.xml"));
-        $I->assertEquals($result->getContent()->getAmount(), 50000);
-    }
 
     public function castingNestedXmlWorks(UnitTester $I)
     {
@@ -68,13 +66,13 @@ class ObjifyCest
 
     public function castingWithSetterWorks(UnitTester $I)
     {
-        $result = (new Objify)->make(new DummyClass(), ['dummySetterProperty' => self::DUMMY_VALUE]);
+        $result = (new Objify)->make(new DummyClass(), [self::DUMMY_SETTER_PROPERTY => self::DUMMY_VALUE]);
         $I->assertEquals($result->getDummySetterProperty(), self::DUMMY_VALUE);
     }
 
     public function castingWithClassNameWorks(UnitTester $I)
     {
-        $result = (new Objify)->make(DummyClass::class, ['dummySetterProperty' => self::DUMMY_VALUE]);
+        $result = (new Objify)->make(DummyClass::class, [self::DUMMY_SETTER_PROPERTY => self::DUMMY_VALUE]);
         $I->assertEquals($result->getDummySetterProperty(), self::DUMMY_VALUE);
     }
 
@@ -97,34 +95,34 @@ class ObjifyCest
         $dummyArray = $dummyClass->toArray();
 
         $I->assertTrue(is_array($dummyArray));
-        $I->assertEquals($dummyArray['dummySetterProperty'], 'oui');
+        $I->assertEquals($dummyArray[self::DUMMY_SETTER_PROPERTY], 'oui');
     }
 
     public function nestedPropertyIsCorrectlyCast(UnitTester $I)
     {
         /** @var DummyClass $result */
-        $result = (new Objify)->make(DummyClass::class, ['nestedProperty' => ['dummySetterProperty' => self::DUMMY_VALUE]]);
+        $result = (new Objify)->make(DummyClass::class, ['nestedProperty' => [self::DUMMY_SETTER_PROPERTY => self::DUMMY_VALUE]]);
         $I->assertEquals($result->nestedProperty->getDummySetterProperty(), self::DUMMY_VALUE);
     }
 
     public function nestedSetterPropertyIsCorrectlyCast(UnitTester $I)
     {
         /** @var DummyClass $result */
-        $result = (new Objify)->make(DummyClass::class, ['nestedSetterProperty' => ['dummySetterProperty' => self::DUMMY_VALUE]]);
+        $result = (new Objify)->make(DummyClass::class, ['nestedSetterProperty' => [self::DUMMY_SETTER_PROPERTY => self::DUMMY_VALUE]]);
         $I->assertEquals($result->getNestedSetterProperty()->getDummySetterProperty(), self::DUMMY_VALUE);
     }
 
     public function nestedSetterPropertyWithClassOnPropertyDocIsCorrectlyCast(UnitTester $I)
     {
         /** @var DummyClass $result */
-        $result = (new Objify)->make(DummyClass::class, ['nestedSetterDocProperty' => ['dummySetterProperty' => self::DUMMY_VALUE]]);
+        $result = (new Objify)->make(DummyClass::class, ['nestedSetterDocProperty' => [self::DUMMY_SETTER_PROPERTY => self::DUMMY_VALUE]]);
         $I->assertEquals($result->getNestedSetterDocProperty()->getDummySetterProperty(), self::DUMMY_VALUE);
     }
 
     public function rootCollectionCreatesChildElements(UnitTester $I)
     {
         /** @var DummyClassCollection $result */
-        $result = (new Objify)->make(DummyClassCollection::class, [[['dummyProperty' => self::DUMMY_VALUE]], ['dummyProperty' => self::DUMMY_VALUE]]);
+        $result = (new Objify)->make(DummyClassCollection::class, [[[self::DUMMY_PROPERTY => self::DUMMY_VALUE]], [self::DUMMY_PROPERTY => self::DUMMY_VALUE]]);
         $I->assertCount(2, $result->objects);
         $I->assertTrue($result->objects[0] instanceof DummyClass);
     }

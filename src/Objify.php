@@ -6,6 +6,7 @@ use Beavor\Actions\ActionChain;
 use Beavor\Actions\ActionInterface;
 use Beavor\Actions\UsePublicProperty;
 use Beavor\Actions\UseSetter;
+use Beavor\Helpers\ArrayToXml;
 use Beavor\Helpers\CollectionInterface;
 use Beavor\Helpers\SanitizedSourceString;
 use PhpDocReader\PhpDocReader;
@@ -45,7 +46,7 @@ class Objify
 
     public function fromRawXml($destination, $source)
     {
-        $data = simplexml_load_string((new SanitizedSourceString($source))->getValue());
+        $data = ArrayToXml::convert((new SanitizedSourceString($source))->getValue());
 
         $json = json_encode($data);
         $xmlArr = json_decode($json, true);

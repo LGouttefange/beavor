@@ -3,6 +3,7 @@
 
 namespace Beavor\Commands;
 
+use Beavor\Helpers\ArrayToXml;
 use Beavor\Helpers\SanitizedSourceString;
 use Nette\PhpGenerator\ClassType;
 use Nette\PhpGenerator\PhpNamespace;
@@ -34,7 +35,7 @@ class GenerateDto extends Command
         $class->addComment("Auto generated Beavor DTO class");
         $source = $input->getOption('json') ?: $questionHelper->ask($input, $output, new Question("Your JSON / XML ?"));
         $source = (new SanitizedSourceString($source))->getValue();
-        $source = json_decode($source, true) ?: json_decode(json_encode(simplexml_load_string($source)), true);
+        $source = json_decode($source, true) ?: ArrayToXml::convert((new SanitizedSourceString($source))->getValue());
         $this->buildClassFromJson($source, $class, new PhpNamespace($class->getNamespace()->getName() . "\\" . $class->getName()));
 
         $this->generateFile($class);
@@ -90,9 +91,13 @@ class GenerateDto extends Command
         if (!is_string($propertyName)) {
             return;
         }
-        $class->addProperty($propertyName)->setVisibility('public');
-        $getter = $class->addMethod("get".ucfirst($propertyName));
-        $getter->setBody("return \$this->$propertyName;");
+        if($propertyName === "@attributes" && is_array($value)){
+            foreach ($value as $name => $attribute) {
+                $this->addProperty($class, $name);
+            }
+            return;
+        }
+        $getter = $this->addProperty($class, $propertyName);
 
         // no more action is needed
         if (!is_array($value)) {
@@ -109,14 +114,12 @@ class GenerateDto extends Command
         $newNameSpace = new PhpNamespace($namespace->getName() ?: $class->getNamespace()->getName() . "\\" . $nestedClassName);
         $newClassFullName = "\\" . $newNameSpace->getName() . "\\" . $nestedClassName;
         // Class collection Has Many
-        if ((array_key_exists(0, $value))) {
-            if (is_array($value[0])) {
-                $this->buildProperty($newNestedClass,$newNameSpace, $propertyName, $value[0]);
-                $class->getProperty($propertyName)->addComment("@var ${newClassFullName}[]");
-                $getter->addComment("@return ${newClassFullName}[]");
-                $this->buildClassFromJson($value[0], $newNestedClass, $newNameSpace);
-                return;
-            }
+        if (array_key_exists(0, $value) && is_array($value[0])) {
+            $this->buildProperty($newNestedClass,$newNameSpace, $propertyName, $value[0]);
+            $class->getProperty($propertyName)->addComment("@var ${newClassFullName}[]");
+            $getter->addComment("@return ${newClassFullName}[]");
+            $this->buildClassFromJson($value[0], $newNestedClass, $newNameSpace);
+            return;
         }
 
         // class property Has One
@@ -128,4 +131,18 @@ class GenerateDto extends Command
 
     }
 
+    /**
+     * @param $class
+     * @param $propertyName
+     *
+     * @return mixed
+     */
+    protected function addProperty($class, $propertyName)
+    {
+        $class->addProperty($propertyName)->setVisibility('public');
+        $getter = $class->addMethod("get" . ucfirst($propertyName));
+        $getter->setBody("return \$this->$propertyName;");
+
+        return $getter;
+    }
 }

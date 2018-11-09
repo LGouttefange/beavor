@@ -12,6 +12,7 @@ class SanitizedSourceString
     {
         $this->value = preg_replace("/\n?\r?/", "", $source);
         $this->value = preg_replace("/(<\/?)([a-z]+)?:([^>]*>)/", "$1$3", $this->value);
+        $this->value = str_replace("-", "_", $this->value);
     }
 
 
