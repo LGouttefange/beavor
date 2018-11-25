@@ -3,6 +3,7 @@
 
 namespace Beavor\Commands;
 
+use Beavor\Actions\BuildClass;
 use Beavor\Helpers\SanitizedSourceString;
 use Nette\PhpGenerator\ClassType;
 use Nette\PhpGenerator\PhpNamespace;
@@ -33,35 +34,22 @@ class GenerateDto extends Command
         $this->output->write("Let's get started and generate a Dto !\n");
         $className = $input->getOption('class') ?: $questionHelper->ask($input, $this->output, new Question("What is the class name ?\n"));
         $namespaceName = $input->getOption('namespace') ?: $questionHelper->ask($input, $this->output, new Question("And its namespace ?\n"));
-
-        $class = new ClassType($className, new PhpNamespace($namespaceName));
-        $class->addComment("Auto generated Beavor DTO class");
-        $source = $input->getOption('json') ?: $questionHelper->ask($input, $this->output, new Question("Your JSON / XML ?"));
-        $source = (new SanitizedSourceString($source))->getValue();
-        $source = json_decode($source, true) ?: json_decode(json_encode(simplexml_load_string($source)), true);
-        $this->buildClassFromJson($source, $class, new PhpNamespace($class->getNamespace()->getName() . "\\" . $class->getName()));
-
-        $this->generateFile($class);
-    }
-
-    /**
-     * @param           $data
-     * @param ClassType $class
-     * @param           $property
-     */
-    protected function buildClassFromJson($data, $class, $namespace = null)
-    {
-        foreach ($data as $propertyName => $value) {
-            $this->buildProperty($class, $namespace, $propertyName, $value);
+//        $data = $input->getOption('json') ?: $questionHelper->ask($input, $this->output, new Question("Your JSON / XML ?"));
+        $data = '{"array":[1,2,3],"boolean":true,"color":"#82b92c","null":null,"number":123,"object":{"a":"b","c":"d","e":"f"},"string":"Hello World"}';
+        $data = (new SanitizedSourceString($data))->getValue();
+        $data = json_decode($data, true) ?: json_decode(json_encode(simplexml_load_string($data)), true);
+        $classes = (new BuildClass)->buildRootClass($data, $className, $namespaceName);
+        foreach ($classes as $class) {
+            $this->generateFile($class);
         }
-        $this->generateFile($class);
+
     }
 
     /**
      * @param $className
      * @param $class
      */
-    protected function generateFile($class)
+    protected function generateFile(ClassType $class)
     {
         $namespace = $class->getNamespace();
 
@@ -77,59 +65,11 @@ class GenerateDto extends Command
         }
 
         $fileName = $targetDirectory . "/" . $class->getName() . ".php";
-        file_put_contents($fileName, "<?php\n\r" . $namespace . $class);
+        $fileContent = "<?php\n\r" . $namespace . $class;
+        file_put_contents($fileName, $fileContent);
 
-        $this->output("Generated $fileName");
+        $this->output->writeln("Generated $fileName");
     }
 
-    /**
-     * @param $class
-     * @param $namespace
-     * @param $propertyName
-     * @param $value
-     */
-    protected function buildProperty($class, $namespace, $propertyName, $value)
-    {
-        // not a property
-        if (!is_string($propertyName)) {
-            return;
-        }
-        $class->addProperty($propertyName)->setVisibility('public');
-        $getter = $class->addMethod("get".ucfirst($propertyName));
-        $getter->setBody("return \$this->$propertyName;");
-
-        // no more action is needed
-        if (!is_array($value)) {
-            return;
-        }
-        $class->getProperty($propertyName)->setValue([]);
-        //we dont know what it has, so we default to a simple array
-        if (count($value) === 0) {
-            $class->getProperty($propertyName)->addComment("@var array");
-            return;
-        }
-        $nestedClassName = ucfirst($propertyName . "Item");
-        $newNestedClass = new ClassType($nestedClassName, $namespace ?: $class->getNamespace());
-        $newNameSpace = new PhpNamespace($namespace->getName() ?: $class->getNamespace()->getName() . "\\" . $nestedClassName);
-        $newClassFullName = "\\" . $newNameSpace->getName() . "\\" . $nestedClassName;
-        // Class collection Has Many
-        if ((array_key_exists(0, $value))) {
-            if (is_array($value[0])) {
-                $this->buildProperty($newNestedClass,$newNameSpace, $propertyName, $value[0]);
-                $class->getProperty($propertyName)->addComment("@var ${newClassFullName}[]");
-                $getter->addComment("@return ${newClassFullName}[]");
-                $this->buildClassFromJson($value[0], $newNestedClass, $newNameSpace);
-                return;
-            }
-        }
-
-        // class property Has One
-        $class->getProperty($propertyName)->addComment("@var $newClassFullName");
-        $getter->addComment("@return $newClassFullName");
-        $this->buildClassFromJson($value, $newNestedClass, $newNameSpace);
-
-
-
-    }
 
 }
