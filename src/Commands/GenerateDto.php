@@ -14,6 +14,9 @@ use Symfony\Component\Console\Question\Question;
 
 class GenerateDto extends Command
 {
+    /** @var  OutputInterface */
+    private $output;
+
     protected function configure()
     {
         $this
@@ -25,14 +28,15 @@ class GenerateDto extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $this->output = $output;
         $questionHelper = $this->getHelper('question');
-        $output->write("Let's get started and generate a Dto !\n");
-        $className = $input->getOption('class') ?: $questionHelper->ask($input, $output, new Question("What is the class name ?\n"));
-        $namespaceName = $input->getOption('namespace') ?: $questionHelper->ask($input, $output, new Question("And its namespace ?\n"));
+        $this->output->write("Let's get started and generate a Dto !\n");
+        $className = $input->getOption('class') ?: $questionHelper->ask($input, $this->output, new Question("What is the class name ?\n"));
+        $namespaceName = $input->getOption('namespace') ?: $questionHelper->ask($input, $this->output, new Question("And its namespace ?\n"));
 
         $class = new ClassType($className, new PhpNamespace($namespaceName));
         $class->addComment("Auto generated Beavor DTO class");
-        $source = $input->getOption('json') ?: $questionHelper->ask($input, $output, new Question("Your JSON / XML ?"));
+        $source = $input->getOption('json') ?: $questionHelper->ask($input, $this->output, new Question("Your JSON / XML ?"));
         $source = (new SanitizedSourceString($source))->getValue();
         $source = json_decode($source, true) ?: json_decode(json_encode(simplexml_load_string($source)), true);
         $this->buildClassFromJson($source, $class, new PhpNamespace($class->getNamespace()->getName() . "\\" . $class->getName()));
@@ -67,15 +71,15 @@ class GenerateDto extends Command
             $targetDirectory = str_replace($psr4_namespace, current($dir)."/", $class->getNamespace()->getName());
         }
 
-
-
-
         // dir doesn't exist, make it
         if (!is_dir($targetDirectory) && !mkdir($targetDirectory, 0777, true) && !is_dir($targetDirectory)) {
             throw new \RuntimeException(sprintf('Directory "%s" was not created', $targetDirectory));
         }
 
-        file_put_contents($targetDirectory."/" . $class->getName() . ".php", "<?php\n\r" . $namespace . $class);
+        $fileName = $targetDirectory . "/" . $class->getName() . ".php";
+        file_put_contents($fileName, "<?php\n\r" . $namespace . $class);
+
+        $this->output("Generated $fileName");
     }
 
     /**

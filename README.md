@@ -1,11 +1,10 @@
-[Not speaking Baguette ? Find the english doc right there](README.en.md)
+[Speaking Baguette ? Find the french doc right there](README.en.md)
 
 # Beavor
-> _Parce qu'ils voulaient pas que que je l'appelle PerCaster_
 
-## Beavor ça fait quoi
+## Okay, so what about Beavor ?
 
-Ca permet d'éviter ça
+It prevents these scenarii :
 ```php
 <?php 
 
@@ -23,7 +22,7 @@ return [
 ];
 ```
 
-En castant un retour d'API (ou n'importe quel array / stdClass en fait) en un DTO réalisé juste avant.
+By casting an API return (or any array/stdclass as a matter of fact), into a DTO generated beforehand.
 
 ```php
 <?php 
@@ -36,21 +35,21 @@ $cconnectObject->getLastName();
 ```
 
 
-### Avantages
+### The pros
 
-+ Pas de manipulations de tableaux / d'objets
-    +   Si la propriété existe dans le DTO, sa valeur sera définie
-    +   Le DTO ne reçoit pas de propriétés supplémentaires
-    +   Fini les _undefined index '...'_ 
-+ Définition unique des retours d'API
-+ Gain de clarté
-+ Manipulation OO possibles 
-+ Fonctionne avec des champs publics ou avec des setters
-+ Possibilité de fonctionner avec des accesseurs/mutateurs
++ No stdClass/array primitive manipulation
+    +   Default values, bulk edit with the entire array
+    +   DTOs do not recieve additional data
+    +   Gotta stop the _undefined index '...'_ errors 
++ API return have a code equivalent in your cade, increasing lisibility
++ Clarity gain
++ OO manipulations  
++ Use setters or public properties
++ Work with accessors/mutators
 
-## Utilisation
+## Usage
 
-Pour rappel : un exemple d'usage tout simple :
+Let's start simple :
 
 ```php
 <?php 
@@ -62,7 +61,7 @@ $cconnectObject->getLastName();
 
 ```
 
-Ou on peut appeler statiquement (dans les TODO : gérer avec PHPdoc ou autre un moyen de pas afficher le warning) :
+Or let's start static (TODO : find a way to prevent warning. I swear it doesn't cause an error) :
 ```php
 <?php 
 
@@ -73,7 +72,7 @@ $cconnectObject->getLastName();
 
 ```
 
-En passant une nouvelle instance de la classe DTO :
+You can pass a new class instance :
 
 ```php
 <?php 
@@ -85,7 +84,7 @@ $cconnectObject->getLastName();
 
 ```
 
-Ou bien la classe même (auquel cas assurez vous d'avoir un constructeur optionnel) :
+Or the class itself (be sure to have an optional constructor) :
 
 ```php
 <?php 
@@ -97,7 +96,7 @@ $cconnectObject->getLastName();
 
 ```
 
-En passant un tableau :
+Pass values within an array :
 
 ```php
 <?php 
@@ -109,11 +108,11 @@ $cconnectObject->getLastName();
 
 ```
 
-Ou un objet :
+Or an object :
 
 ```php
 <?php 
-$cconnectUser = json_decode('<<le JSON>>');
+$cconnectUser = json_decode('<<raw JSON>>');
 $cconnectObject = \Beavor\Objify::make( Beavor\Dto\CconnectUserDto::class, $cconnectUser);
 $cconnectObject->getGuid();
 $cconnectObject->getLastName();
@@ -121,21 +120,29 @@ $cconnectObject->getLastName();
 
 ```
 
-Ou même le JSON brut :
-
-Ou un objet :
+Even the raw JSON :
 
 ```php
 <?php 
 
-$cconnectObject = (new \Beavor\Objify)->fromRawJson( CconnectUserDto::class, '<<le JSON>>');
+$cconnectObject = (new \Beavor\Objify)->fromRawJson( CconnectUserDto::class, '<<raw JSON>>');
+$cconnectObject->getGuid();
+$cconnectObject->getLastName();
+...
+
+Or a Psr7 Response (great for Guzzle usage) :
+
+```php
+<?php 
+
+$cconnectObject = (new \Beavor\Objify)->fromRawJson( CconnectUserDto::class, $guzzle->get(...));
 $cconnectObject->getGuid();
 $cconnectObject->getLastName();
 ...
 
 ```
 
-Un DTO peut contenir d'autres DTO :
+A DTO can contain other DTOs :
 
 
 ```php
@@ -143,13 +150,13 @@ Un DTO peut contenir d'autres DTO :
 
 $cconnectObject = \Beavor\Objify::make( Beavor\Dto\CconnectUserDto::class, $cconnectUser);
 $cconnectObject->getGuid();
-$cconnectObject->getAddress(); // instance de CconnectUserAddressDto
+$cconnectObject->getAddress(); // instance of CconnectUserAddressDto
 $cconnectObject->getAddress()->getCity();
 ...
 
 ```
 
-Si le DTO enfant n'est pas défini dans la classe, alors on a un stdClass :
+If the child's class is not defined within the DTO, it'll be a stdClass :
 
 ```php
 <?php 
@@ -162,7 +169,7 @@ $cconnectObject->getAddress()->city;
 
 ```
 
-Pour définir le DTO enfant, utilisez l'annotation de PhpDoc sur le champ concerné :
+To define the child, simply put the class in the PhpDoc block :
 
 
 ```php
@@ -179,7 +186,7 @@ class CconnectUserDto
 
 ```
 
-Ca fonctionne aussi avec les collections d'objet :
+Also works with objects collections :
 
 
 ```php
@@ -202,16 +209,16 @@ class GetUsersDto
 
 $cconnectObject = (new \Beavor\Objify)->make( GetUsersDto::class, $response);
 
-foreach ($users as $user) { // $user est une instance de User
+foreach ($users as $user) { // $user is an instance  of User
     $user->getName();
 }
 
 ```
 
-## Le DTO
+## The DTO
 
 
-Exemple de DTO :
+An example of DTO :
 
 ```php
 <?php
@@ -256,23 +263,24 @@ class DummyClass
 }
 ```
 
-1. Le caster utilise en priorité les setters (ex: le _dummySetterProperty_)
-2. Cependant vous pouvez définir la propriété publique et ne pas définir de setter (ex: le _dummyProperty_)
-3. Si la propriété est protégée et sans setter, elle ne sera jamais touchée (ex: le _unaccessibleProperty_)
-4. Lors du casting aucune propriété n'est rajoutée au DTO. Il n'a que ce qui lui est défini
+1. The caster will first try to use the setter (ex:  _dummySetterProperty_)
+2. But you can use public properties without setter for a thinner class (ex:  _dummyProperty_)
+3. A protected property without accessor will never be set (ex:  _unaccessibleProperty_)
+4. No attribute is added. Only properties the DTO knows are filled
 
 
-# Generation de DTO
+# DTO Generation
 
-Si vous avez beaucoup de champs dans votre DTO, que vous avez beaucoup de classes, ou les deux, utilisez le script de génération de DTO !
+Manually creating DTOs can be a hassle, I know. That's why a script is bundled !
 
-```php vendor/bin/beavor.php```
+(Messed up the vendor bin. Fix coming soon for vendor/bin usage)
+```php vendor/lgouttefange/beavor/beavor.php```
 
-On vous demandera :
-1. Le nom de classe (ex: CniUploadResponseDto)
-2. Le namespace (ex: \Beavor\Dto) 
-3. Le JSON minifié de la réponse à transformer
+You will be asked :
+1. The className (ex: CniUploadResponseDto)
+2. The namespace (ex: \Beavor\Dto) 
+3. The minified XML/JSON to be structured into a DTO
 
-Les fichiers seront automatiquement générés dans votre arborescence directement, avec une détection des racines PSR-4 pour que vous n'ayez plus rien à toucher.
+Files will be directly created in your project tree, with an automatic PSR-4 root detection, so your DTOs are directly usable.
 
-Par défaut, tous les Dto sont générés avec des getters et des champs publics.
+By defaults, DTOs have public properties with their associated getter.
