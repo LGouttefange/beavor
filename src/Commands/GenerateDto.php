@@ -4,6 +4,7 @@
 namespace Beavor\Commands;
 
 use Beavor\Actions\BuildClass;
+use Beavor\Helpers\DataExtractor;
 use Beavor\Helpers\SanitizedSourceString;
 use Nette\PhpGenerator\ClassType;
 use Nette\PhpGenerator\PhpNamespace;
@@ -34,10 +35,8 @@ class GenerateDto extends Command
         $this->output->write("Let's get started and generate a Dto !\n");
         $className = $input->getOption('class') ?: $questionHelper->ask($input, $this->output, new Question("What is the class name ?\n"));
         $namespaceName = $input->getOption('namespace') ?: $questionHelper->ask($input, $this->output, new Question("And its namespace ?\n"));
-//        $data = $input->getOption('json') ?: $questionHelper->ask($input, $this->output, new Question("Your JSON / XML ?"));
-        $data = '{"array":[1,2,3],"boolean":true,"color":"#82b92c","null":null,"number":123,"object":{"a":"b","c":"d","e":"f"},"string":"Hello World"}';
-        $data = (new SanitizedSourceString($data))->getValue();
-        $data = json_decode($data, true) ?: json_decode(json_encode(simplexml_load_string($data)), true);
+        $data = $input->getOption('json') ?: $questionHelper->ask($input, $this->output, new Question("Your JSON / XML ?"));
+        $data = (new DataExtractor)->getValue($data);
         $classes = (new BuildClass)->buildRootClass($data, $className, $namespaceName);
         foreach ($classes as $class) {
             $this->generateFile($class);
