@@ -22,5 +22,5 @@
         "symfony/console": ">=3.0",
         "nette/php-generator": "^2.6"
     },
-    "bin": ["beavor.php"]
+    "bin": ["beavor"]
 }
