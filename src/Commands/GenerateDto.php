@@ -35,8 +35,10 @@ class GenerateDto extends Command
         $className = $input->getOption('class') ?: $questionHelper->ask($input, $this->output, new Question("What is the class name ?\n"));
         $namespaceName = $input->getOption('namespace') ?: $questionHelper->ask($input, $this->output, new Question("And its namespace ?\n"));
         $data = $input->getOption('json') ?: $questionHelper->ask($input, $this->output, new Question("Your JSON / XML ?"));
+
         $data = (new DataExtractor)->getValue($data);
         $classes = (new BuildClass)->buildRootClass($data, $className, $namespaceName);
+
         foreach ($classes as $class) {
             $this->generateFile($class);
         }
@@ -63,7 +65,7 @@ class GenerateDto extends Command
         }
 
         $fileName = $targetDirectory . "/" . $class->getName() . ".php";
-        $fileContent = "<?php\n\r" . $namespace . $class;
+        $fileContent = "<?php" . PHP_EOL . $namespace . $class;
         file_put_contents($fileName, $fileContent);
 
         $this->output->writeln("Generated $fileName");
