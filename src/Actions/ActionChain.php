@@ -8,7 +8,7 @@ use PhpDocReader\AnnotationException;
 
 class ActionChain
 {
-    /** @var ActionInterface[] */
+    /** @var string[] */
     protected $actions;
 
     public function __construct($actions)
@@ -19,10 +19,17 @@ class ActionChain
 
     public function handle($source, $destination, $sourceProperty)
     {
+
+        $actions = array_map(function ($action) use ($sourceProperty, $destination, $source) {
+            /** @var ActionInterface $actionInstance */
+            return new $action($source, $destination, $sourceProperty);
+        }, $this->actions);
+
         /** @var ActionInterface $action */
-        $action = current(array_filter($this->actions, function (ActionInterface $action) use ($sourceProperty, $destination, $source) {
+        $action = current(array_filter($actions, function (ActionInterface $action) {
             return $action->canHandle();
         }));
+
         if (!$action) {
             return;
         }

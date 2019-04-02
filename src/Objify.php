@@ -9,6 +9,7 @@ use Beavor\Actions\UseSetter;
 use Beavor\Helpers\ArrayToXml;
 use Beavor\Helpers\CollectionInterface;
 use Beavor\Helpers\SanitizedSourceString;
+use Beavor\Helpers\SourceDataDeserializer;
 use PhpDocReader\PhpDocReader;
 use Psr\Http\Message\ResponseInterface;
 use ReflectionParameter;
@@ -30,7 +31,7 @@ class Objify
 
     /**
      * @param string|object $destination
-     * @param string        $source
+     * @param string $source
      *
      * @return \stdClass
      */
@@ -56,39 +57,40 @@ class Objify
     }
 
     /**
-     * @param string|object   $destination
+     * @param string|object $destination
      * @param \stdClass|array $source
      *
      * @return \stdClass
      */
     public function make($destination, $source)
     {
+        if (!isset($this)) {
+            return (new static())->make($destination, $source);
+        }
 
         if (is_string($destination)) {
             $destination = new $destination();
         }
 
-        if ($source instanceof ResponseInterface) {
-            $source = json_decode((string) $source->getBody());
-        }
+        $source = (new SourceDataDeserializer())->deserialize($source);
 
-        if (is_array($source)) {
-            $source = json_decode(json_encode($source));
-        }
-        if (is_array($source) ) {
-            if($destination instanceof CollectionInterface){
-                $destination->setEntries(array_map(function($entry) use($destination){
-                    return $this->make($destination->getEntriesClass(), $entry);
-                    }, $source));
-            }
+        if (is_array($source) && $destination instanceof CollectionInterface) {
+            $destination->setEntries($this->makeCollection($destination->getEntriesClass(), $source));
             return $destination;
         }
-        $sourceProperties = (new \ReflectionObject($source))->getProperties();
-        foreach ($sourceProperties as $sourceProperty) {
-            $this->callPropertySetter($destination, $source, $sourceProperty);
-        }
+
+        $this->fillClass($destination, $source);
 
         return $destination;
+    }
+
+
+    public function makeCollection($destination, $source)
+    {
+        $source = (new SourceDataDeserializer())->deserialize($source);
+        return array_map(function ($entry) use ($destination) {
+            return $this->fillClass(new $destination(), (new SourceDataDeserializer())->deserialize($entry));
+        }, $source);
     }
 
     /**
@@ -98,18 +100,28 @@ class Objify
      */
     protected function callPropertySetter($destination, \stdClass $source, $sourceProperty)
     {
-        $actionClasses = [
+        (new ActionChain([
             UseSetter::class,
             UsePublicProperty::class,
-        ];
+        ]))->handle($source, $destination, $sourceProperty);
 
-        $actions = array_map(function ($action) use ($sourceProperty, $destination, $source) {
-            /** @var ActionInterface $actionInstance */
-            return new $action($source, $destination, $sourceProperty);
-        }, $actionClasses);
+    }
 
-        (new ActionChain($actions))->handle($source, $destination, $sourceProperty);
+    /**
+     * @param $destination
+     * @param $source
+     */
+    protected function fillClass($destination, $source)
+    {
+        if(is_array($source)){
+            return $destination;
+        }
+        $sourceProperties = (new \ReflectionObject($source))->getProperties();
+        foreach ($sourceProperties as $sourceProperty) {
+            $this->callPropertySetter($destination, $source, $sourceProperty);
+        }
 
+        return $destination;
     }
 
 

@@ -1,7 +1,6 @@
 <?php
 
 
-use Beavor\Dto\Partners\Eureka\PaymentSchedule;
 use Beavor\Objify;
 use Helper\DummyClass;
 use Helper\DummyClassCollection;
@@ -125,5 +124,13 @@ class ObjifyCest
         $result = (new Objify)->make(DummyClassCollection::class, [[[self::DUMMY_PROPERTY => self::DUMMY_VALUE]], [self::DUMMY_PROPERTY => self::DUMMY_VALUE]]);
         $I->assertCount(2, $result->objects);
         $I->assertTrue($result->objects[0] instanceof DummyClass);
+    }
+
+    public function makeCollectionWorks(UnitTester $I)
+    {
+        /** @var DummyClassCollection $result */
+        $result = (new Objify)->makeCollection(DummyClass::class, [[[self::DUMMY_PROPERTY => self::DUMMY_VALUE]], [self::DUMMY_PROPERTY => self::DUMMY_VALUE]]);
+        $I->assertCount(2, $result);
+        $I->assertTrue($result[0] instanceof DummyClass);
     }
 }
