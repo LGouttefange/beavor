@@ -41,7 +41,7 @@ $cconnectObject->getLastName();
     +   Default values, bulk edit with the entire array
     +   DTOs do not recieve additional data
     +   Gotta stop the _undefined index '...'_ errors 
-+ API return have a code equivalent in your cade, increasing lisibility
++ API returns have a code equivalent, self-documentating it
 + Clarity gain
 + OO manipulations  
 + Use setters or public properties
@@ -273,12 +273,12 @@ class DummyClass
 
 Manually creating DTOs can be a hassle, I know. That's why a script is bundled !
 
-(Messed up the vendor bin. Fix coming soon for vendor/bin usage)
-```php vendor/lgouttefange/beavor/beavor.php```
+
+```vendor/lgouttefange/beavor/beavor```
 
 You will be asked :
-1. The className (ex: CniUploadResponseDto)
-2. The namespace (ex: \Beavor\Dto) 
+1. The className (ex: User)
+2. The namespace (ex: Beavor\Dto) 
 3. The minified XML/JSON to be structured into a DTO
 
 Files will be directly created in your project tree, with an automatic PSR-4 root detection, so your DTOs are directly usable.
